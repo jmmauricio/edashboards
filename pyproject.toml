@@ -8,7 +8,7 @@ authors = [{name = "Juan Manuel Mauricio", email = "jmmauricio@us.es"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 [project.urls]
 Home = "https://personal.us.es/jmmauricio/"

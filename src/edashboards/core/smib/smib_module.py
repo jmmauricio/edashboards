@@ -5,31 +5,23 @@ from pydae.bmapu import bmapu_builder
 
 
 data = {
-"sys":{"name":"smib","S_base":100e6, "K_sec":0.01,"K_p_agc":1.0,"K_i_agc":0.1},       
-"buses":[{"name":"1", "P_W":0.0,"Q_var":0.0,"U_kV":20.0},
-         {"name":"2", "P_W":500.0e6,"Q_var":0.0,"U_kV":20.0}
-        ],
-"lines":[{"bus_j":"1", "bus_k":"2", "X_pu":0.05,"R_pu":0.01,"Bs_pu":1e-6,"S_mva":2e3}],
-"syns":[
-      {"bus":"1","S_n":900e6,
-         "X_d":1.8,"X1d":0.3, "T1d0":8.0,    
-         "X_q":1.7,"X1q":0.55,"T1q0":0.4,  
-         "R_a":0.01,"X_l": 0.2, 
-         "H":5.0,"D":1.0,
-         "Omega_b":314.1592653589793,"omega_s":1.0,"K_sec":0.0,
-         "gov":{"type":"agov1","Droop":0.05,"T_1":1.0,"T_2":2.0,"T_3":10.0, "p_c":0.01,"omega_ref":1.0, "K_imw":0.1},
-         "K_delta":0.0},
-      {"bus":"2","S_n":90000e6,
+    "sys":{"name":"smib_syn","S_base":100e6, "K_p_agc":0.0,"K_i_agc":0.0,"K_xif":0.01},  
+    "lines":[
+        {"bus_j": "1",  "bus_k":  "2", "X_pu":0.01, "R_pu":0.0, "S_mva": 200.0, 'monitor':True}
+         ],
+    "buses":[
+            {"name":  "1", "P_W":0.0, "Q_var":0.0, "pos_x": -1500.0, "pos_y":  200.0, "units": "m", "U_kV":20.0},
+            {"name":  "2", "P_W":0.0, "Q_var":0.0, "pos_x":   100.0, "pos_y":    0.0, "units": "m", "U_kV":20.0}
+    ],
+    "genapes":[{"bus":"2","S_n":1000e6,"F_n":50.0,"R_v":0.01,"X_v":0.1,"K_delta":0.001,"K_alpha":0.00001}],
+    "syns":[{"bus":"1","S_n":100e6,
          "X_d":1.8,"X1d":0.3, "T1d0":8.0,    
          "X_q":1.7,"X1q":0.55,"T1q0":0.4,  
          "R_a":0.0025,"X_l": 0.2, 
-         "H":5.0,"D":1.0,
-         "Omega_b":314.1592653589793,"omega_s":1.0,"K_sec":0.01,
-         "avr":{"type":"sexs","K_a":100, "T_r":0.02, "K_ai":1e-6, "v_pss":0.0, "v_ref":1.0,"V_min":-5,"V_max":5.0,"K_aw":2.0},
-         "gov":{"type":"agov1","Droop":0.05,"T_1":1.0,"T_2":2.0,"T_3":10.0, "p_c":0.01,"omega_ref":1.0, "K_imw":0.0},
-         "K_delta":0.01}
-         ]
-}
+         "H":5.0,"D":0.5,
+         "Omega_b":314.1592653589793,"omega_s":1.0,"K_sec":0.0,
+         "K_delta":0.0}  
+]}
 
 grid = bmapu_builder.bmapu(data)
 grid.checker()
@@ -75,10 +67,8 @@ class dashboard(smib.model):
         grid = smib.model()
         grid.Dt = 0.01
         grid.decimation = 1
-        grid.ini({'p_c_1':0.0,'v_f_1':1.0,
-                  'P_2':-50000e6,'D_1':0,
-                 "T_gov_1_1":1.0,"T_gov_2_1":1.0,"T_gov_3_1":1.0, "K_imw_1":1,"Droop_1":1e3},'xy_0.json')
-        grid.run(30.0,{})
+        grid.ini({'p_m_1':0.0,'v_f_1':1.0},'xy_0.json')
+        grid.run(20.0,{})
         grid.post();
         
         self.grid = grid
@@ -103,14 +93,14 @@ class dashboard(smib.model):
         self.line_omega = axes[1,0].plot(grid.Time, grid.get_values('omega_1'), label='$\sf \omega$', color=colors[1])
         self.line_v_1 = axes[0,1].plot(grid.Time, grid.get_values('V_1'), label='$\sf V_1$', color=colors[5])
         #line_theta_1 = axes[0,1].plot(T, Y[:,syst.y_list.index('theta_1')], label='$\sf \\theta_1$')
-        self.line_p_t = axes[1,1].plot(grid.Time, grid.get_values('p_g_1'), label='$\sf P_t$', color=colors[2])
-        self.line_q_t = axes[1,1].plot(grid.Time, grid.get_values('q_g_1'), label='$\sf Q_t$', color=colors[0])
+        self.line_p_t = axes[1,1].plot(grid.Time, grid.get_values('p_g_1'), label='$\sf p_s$', color=colors[2])
+        self.line_q_t = axes[1,1].plot(grid.Time, grid.get_values('q_g_1'), label='$\sf q_s$', color=colors[0])
 
         y_labels = ['$\delta$','$\omega$','$P_t$']
 
         axes[0,0].set_ylim((-1,2))
-        axes[1,0].set_ylim((0.95,1.05))
-        axes[0,1].set_ylim((0.8,1.2))
+        axes[1,0].set_ylim((0.98,1.02))
+        axes[0,1].set_ylim((0.95,1.05))
         axes[1,1].set_ylim((-0.5,1.5))
 
         axes[0,0].grid(True)
@@ -173,15 +163,13 @@ class dashboard(smib.model):
 
         #grid = smib.smib_class()
         #grid.Dt = 0.01
-        grid.decimation = 10
+        grid.decimation = 2
         grid.Dt = 0.01
-        grid.ini({'p_c_1':0.0,'v_f_1':1.0,
-                  'P_2':-50000e6,'D_1':0,
-                 "T_gov_1_1":0.1,"T_gov_2_1":1.0,"T_gov_3_1":1.0, "K_imw_1":1,"Droop_1":1e3},'xy_0.json')
+        grid.ini({'p_m_1':0.0,'v_f_1':1.0},'xy_0.json')
         grid.run( 1.0,{})
-        grid.run(10,{'p_c_1':p_m,'v_f_1':v_f})
+        grid.run(10,{'p_m_1':p_m,'v_f_1':v_f})
         grid.Dt = 0.1
-        grid.run(30,{'p_c_1':p_m,'v_f_1':v_f})
+        grid.run(20,{'p_m_1':p_m,'v_f_1':v_f})
 
         grid.post();
 
@@ -194,7 +182,7 @@ class dashboard(smib.model):
         self.line_q_t[0].set_data(grid.Time, grid.get_values('q_g_1'))
 
         i_d, i_q = grid.get_mvalue(['i_d_1','i_q_1'])
-        c = (i_d**2+i_q**2)*0.5
+        c = (i_d**2+i_q**2)*0.5*np.sqrt(2)
 
         self.prog_c.bar_style = 'success'
         if c>0.9:
