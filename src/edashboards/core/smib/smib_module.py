@@ -59,7 +59,7 @@ dblr.build()
 import numpy as np
 import matplotlib.pyplot as plt
 import ipywidgets
-#plt.style.use('presentation.mplstyle')
+plt.style.use(r'https://raw.githubusercontent.com/jmmauricio/edashboards/main/presentation.mplstyle')
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 import smib
@@ -83,7 +83,7 @@ class dashboard(smib.model):
         
         self.grid = grid
         
-        #plt.style.use('presentation.mplstyle')
+        plt.style.use(r'https://raw.githubusercontent.com/jmmauricio/edashboards/main/presentation.mplstyle')
         self.colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         self.widgets()
         
@@ -132,12 +132,14 @@ class dashboard(smib.model):
         #axes[1].set_title('Corriente en función de la velocidad')
 
 
-        self.sld_p_m = ipywidgets.FloatSlider(orientation='horizontal',description = "$\sf p_m$", 
+        self.sld_p_m = ipywidgets.FloatSlider(orientation='horizontal',
+                                        description_allow_html=True,description="p<sub>m</sub>", 
                                         value=grid.get_value('p_m_1'), min=0.0,max= 1.2, 
                                         step=.1)
 
 
-        self.sld_v_f = ipywidgets.FloatSlider(orientation='horizontal',description = "$\sf v_f$", 
+        self.sld_v_f = ipywidgets.FloatSlider(orientation='horizontal',
+                                        description_allow_html=True,description="v<sub>f</sub>", 
                                         value=grid.get_value('v_f_1'), min=0.5,max= 4, 
                                         step=.1)
 
