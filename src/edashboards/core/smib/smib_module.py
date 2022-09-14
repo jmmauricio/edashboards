@@ -83,7 +83,7 @@ class dashboard(smib.model):
         
         self.grid = grid
         
-        plt.style.use('presentation.mplstyle')
+        #plt.style.use('presentation.mplstyle')
         self.colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         self.widgets()
         
